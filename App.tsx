@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { PlacedItem, FruitType } from './types';
 import { FruitPicker } from './components/FruitPicker';
 import { Altar } from './components/Altar';
@@ -19,6 +19,36 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   
   const trashRef = useRef<HTMLDivElement>(null);
+
+  // Unlock audio on first user interaction (required for mobile browsers)
+  useEffect(() => {
+    const unlockAudio = () => {
+      soundService.unlockAudio();
+    };
+
+    // Try to unlock on mount (works on desktop)
+    unlockAudio();
+
+    // Also unlock on first touch/click (required for mobile)
+    const events = ['touchstart', 'touchend', 'mousedown', 'click'];
+    const handleFirstInteraction = () => {
+      unlockAudio();
+      // Remove listeners after first interaction
+      events.forEach(event => {
+        document.removeEventListener(event, handleFirstInteraction);
+      });
+    };
+
+    events.forEach(event => {
+      document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleFirstInteraction);
+      });
+    };
+  }, []);
 
   const getCenterPosition = () => {
     const w = window.innerWidth;
