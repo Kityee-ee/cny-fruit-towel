@@ -11,6 +11,7 @@ export enum FruitType {
   SUGAR_CANE = 'SUGAR_CANE',
   PEANUT = 'PEANUT',
   INGOT = 'INGOT', 
+  CAI_SHEN = 'CAI_SHEN',
   // Stickers / Decor
   STICKER_FU = 'STICKER_FU',
   STICKER_ENVELOPE = 'STICKER_ENVELOPE',

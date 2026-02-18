@@ -52,12 +52,11 @@ const App: React.FC = () => {
   };
 
   const handleReset = () => {
-    if (confirm("确定要清空水果塔重新开始吗？(Clear all?)")) {
-      soundService.playDelete();
-      setItems([]);
-      setBlessingData(null);
-      setSelectedItemId(null);
-    }
+    // Immediate reset without confirmation
+    soundService.playDelete();
+    setItems([]);
+    setBlessingData(null);
+    setSelectedItemId(null);
   };
 
   const handlePray = async () => {
@@ -84,14 +83,15 @@ const App: React.FC = () => {
     <div className="w-full h-screen overflow-hidden flex flex-col relative text-yellow-50 bg-red-900">
       
       {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 p-4 z-50 flex justify-between items-start pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 p-4 z-50 flex justify-between items-start pointer-events-none">
         <div className="pointer-events-auto">
            <button 
              onClick={handleReset}
-             className="bg-red-900/80 backdrop-blur text-yellow-200 p-3 rounded-full border border-yellow-600/50 hover:bg-red-800 transition shadow-lg"
+             className="bg-red-900/80 backdrop-blur text-yellow-200 py-2 px-4 rounded-full border border-yellow-600/50 hover:bg-red-800 transition shadow-lg flex items-center gap-2"
              title="Reset"
            >
-             <RotateCcw size={20} />
+             <RotateCcw size={18} />
+             <span className="text-sm font-bold">重置</span>
            </button>
         </div>
 
@@ -106,10 +106,10 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Trash Bin - Repositioned to Top Left */}
+      {/* Trash Bin - Repositioned to Top Left, adjusted for spacing */}
       <div 
         ref={trashRef}
-        className="fixed top-20 left-4 z-40 p-4 border-2 border-dashed border-red-400/50 rounded-2xl bg-red-950/50 backdrop-blur-sm text-red-300 transition-colors hover:bg-red-800/80 hover:border-red-400 hover:text-red-100 flex flex-col items-center justify-center gap-1 group"
+        className="fixed top-24 left-4 z-40 p-4 border-2 border-dashed border-red-400/50 rounded-2xl bg-red-950/50 backdrop-blur-sm text-red-300 transition-colors hover:bg-red-800/80 hover:border-red-400 hover:text-red-100 flex flex-col items-center justify-center gap-1 group"
       >
         <Trash2 size={32} />
         <span className="text-xs font-bold opacity-70 group-hover:opacity-100">拖到这里删除</span>
