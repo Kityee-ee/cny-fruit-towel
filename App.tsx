@@ -176,14 +176,16 @@ const App: React.FC = () => {
     setIsModalOpen(true);
     if (!blessingData) {
       setLoading(true);
-      try {
-        const result = await generateBlessing(items);
-        setBlessingData(result);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+      setTimeout(async () => {
+        try {
+          const result = await generateBlessing(items);
+          setBlessingData(result);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      }, 3000); // 3 second loading delay
     }
   };
 

@@ -28,12 +28,16 @@ export const BlessingModal: React.FC<BlessingModalProps> = ({ isOpen, onClose, b
         <div className="absolute bottom-2 right-2 w-8 h-8 border-b-4 border-r-4 border-yellow-400 rounded-br-lg"></div>
 
         <div className="text-center">
-          <h2 className="text-3xl font-calligraphy text-yellow-400 mb-6 drop-shadow-md">✨ 财神赐福 ✨</h2>
+          <h2 className="text-3xl text-yellow-400 mb-6 drop-shadow-md">
+            <span className="font-sans">✨ ONG MALI ONG ! ✨</span>
+            <br />
+            <span className="font-calligraphy">财神给你4个字</span>
+          </h2>
           
           {loading ? (
              <div className="flex flex-col items-center py-8">
                 <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-yellow-100 animate-pulse">财神正在为您写诗...</p>
+                <p className="text-yellow-100 animate-pulse">财神正在为您加持...</p>
              </div>
           ) : (
             <>
@@ -44,7 +48,7 @@ export const BlessingModal: React.FC<BlessingModalProps> = ({ isOpen, onClose, b
               </div>
 
               <div className="mb-8">
-                <p className="text-yellow-400/80 text-sm mb-2 uppercase tracking-widest">您的幸运号码</p>
+                <p className="text-yellow-400/80 text-sm mb-2 uppercase tracking-widest">还不快去买Toto‼️</p>
                 <div className="flex justify-center gap-2 md:gap-4 flex-wrap">
                   {luckyNumbers.map((num, i) => (
                     <motion.div 
@@ -52,7 +56,7 @@ export const BlessingModal: React.FC<BlessingModalProps> = ({ isOpen, onClose, b
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: i * 0.1 }}
-                      className="w-10 h-10 md:w-12 md:h-12 bg-yellow-500 rounded-full flex items-center justify-center text-red-900 font-bold text-lg shadow-lg border-2 border-yellow-200"
+                      className="px-6 py-3 bg-yellow-500 rounded-lg flex items-center justify-center text-red-900 font-bold text-2xl md:text-3xl shadow-lg border-2 border-yellow-200"
                     >
                       {num}
                     </motion.div>

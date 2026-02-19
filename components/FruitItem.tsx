@@ -121,7 +121,22 @@ export const FruitItem: React.FC<FruitItemProps> = ({
       <div className={`relative transition-all duration-200 ${isSelected ? 'bg-white/10 rounded-full' : ''}`}>
          {isImage ? (
            <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
-             <img src={def.imageUrl} alt={def.name} className="w-full h-full object-contain pointer-events-none" />
+             <img 
+               src={def.imageUrl} 
+               alt={def.name} 
+               className="w-full h-full object-contain pointer-events-none"
+               style={{
+                 // Optimized rendering for high-resolution PNG on mobile
+                 imageRendering: 'auto',
+                 WebkitBackfaceVisibility: 'hidden',
+                 backfaceVisibility: 'hidden',
+                 transform: 'translateZ(0)', // Force hardware acceleration
+                 willChange: 'transform',
+               }}
+               // High-resolution PNGs ensure crisp rendering on all devices
+               width={item.type === FruitType.CAI_SHEN ? 1200 : item.type === FruitType.DRAGONFRUIT ? 900 : (item.type === FruitType.STICKER_LANTERN || item.type === FruitType.STICKER_FIRECRACKER) ? 512 : item.type === FruitType.PERSIMMON ? 128 : 200}
+               height={item.type === FruitType.CAI_SHEN ? 1440 : item.type === FruitType.DRAGONFRUIT ? 1200 : (item.type === FruitType.STICKER_LANTERN || item.type === FruitType.STICKER_FIRECRACKER) ? 512 : item.type === FruitType.PERSIMMON ? 128 : 240}
+             />
            </div>
          ) : isFu ? (
            <div className="bg-red-600 w-16 h-16 flex items-center justify-center shadow-sm transform rotate-45 border border-yellow-800/20">
