@@ -21,43 +21,86 @@ const App: React.FC = () => {
   
   const trashRef = useRef<HTMLDivElement>(null);
 
-  // Initialize background music
+  // Initialize background music and auto-play
   useEffect(() => {
     // Initialize music - the file should be in public/assets/
     // Supports: .mp3, .wav, .ogg, .m4a
-    soundService.initBackgroundMusic('/assets/festive-music.mp3').catch(() => {
-      // If music file doesn't exist, that's okay - it will just be silent
-      // You can use .mp3, .wav, .ogg, or .m4a - just update the filename above
-      console.log('Background music file not found. Please add festive-music.mp3 (or .wav/.ogg/.m4a) to public/assets/');
-    });
+    soundService.initBackgroundMusic('/assets/festive-music.mp3')
+      .then(() => {
+        // Try to auto-play music on load
+        // This may fail on mobile browsers due to autoplay policies
+        soundService.playBackgroundMusic()
+          .then(() => {
+            setIsMusicPlaying(true);
+            console.log('Background music auto-played successfully');
+          })
+          .catch((e) => {
+            // Auto-play failed (likely due to browser policy) - user can manually start it
+            console.log('Auto-play blocked by browser. User can manually start music.');
+            setIsMusicPlaying(false);
+          });
+      })
+      .catch(() => {
+        // If music file doesn't exist, that's okay - it will just be silent
+        console.log('Background music file not found. Please add festive-music.mp3 (or .wav/.ogg/.m4a) to public/assets/');
+      });
   }, []);
 
   // Unlock audio on first user interaction (required for mobile browsers)
   useEffect(() => {
-    const unlockAudio = () => {
-      soundService.unlockAudio();
+    let unlockAttempted = false;
+
+    const unlockAudio = async () => {
+      // Only attempt unlock once per session to avoid spam
+      if (unlockAttempted) return;
+      unlockAttempted = true;
+      
+      try {
+        await soundService.unlockAudio();
+        console.log('Audio unlock attempted on user interaction');
+        
+        // After unlocking, try to auto-play music if it's not already playing
+        const currentMusicState = soundService.getMusicPlaying();
+        if (!currentMusicState) {
+          try {
+            await soundService.playBackgroundMusic();
+            setIsMusicPlaying(true);
+            console.log('Background music auto-played after unlock');
+          } catch (e) {
+            // Music play failed - user can manually start it
+            console.log('Auto-play after unlock failed:', e);
+          }
+        }
+      } catch (e) {
+        console.warn('Audio unlock failed:', e);
+        unlockAttempted = false; // Retry on next interaction if failed
+      }
     };
 
     // Try to unlock on mount (works on desktop)
     unlockAudio();
 
     // Also unlock on first touch/click (required for mobile)
+    // Use capture phase to ensure we get the event early, before other handlers
     const events = ['touchstart', 'touchend', 'mousedown', 'click'];
-    const handleFirstInteraction = () => {
+    const handleFirstInteraction = (e: Event) => {
+      // Unlock immediately on user interaction - this is critical for mobile
       unlockAudio();
-      // Remove listeners after first interaction
-      events.forEach(event => {
-        document.removeEventListener(event, handleFirstInteraction);
-      });
     };
 
+    // Add listeners with capture phase for better mobile support
+    // Use 'once: false' so we can retry if first attempt fails
     events.forEach(event => {
-      document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
+      document.addEventListener(event, handleFirstInteraction, { 
+        once: false, 
+        passive: true,
+        capture: true 
+      });
     });
 
     return () => {
       events.forEach(event => {
-        document.removeEventListener(event, handleFirstInteraction);
+        document.removeEventListener(event, handleFirstInteraction, { capture: true });
       });
     };
   }, []);
@@ -160,9 +203,10 @@ const App: React.FC = () => {
            </button>
            <button 
              onClick={handleToggleMusic}
-             className="bg-red-900/80 backdrop-blur text-yellow-200 py-2 px-3 rounded-full border border-yellow-600/50 hover:bg-red-800 transition shadow-lg flex items-center gap-2 cursor-pointer z-50"
+             className="bg-red-900/80 backdrop-blur text-yellow-200 py-2 px-3 rounded-full border border-yellow-600/50 hover:bg-red-800 transition shadow-lg flex items-center gap-2 cursor-pointer relative z-[60]"
              title={isMusicPlaying ? "Pause Music" : "Play Music"}
              type="button"
+             style={{ pointerEvents: 'auto' }}
            >
              {isMusicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
            </button>
