@@ -1,6 +1,9 @@
 export class SoundService {
   private context: AudioContext | null = null;
   private isUnlocked: boolean = false;
+  private backgroundMusic: HTMLAudioElement | null = null;
+  private isMusicPlaying: boolean = false;
+  private musicVolume: number = 0.3; // 30% volume for background music
 
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
@@ -89,6 +92,81 @@ export class SoundService {
   playSpawn() {
      // Pleasant chime
      this.playOscillator('sine', 880, 880, 0.15, 0.05).catch(() => {});
+  }
+
+  // Background music methods
+  async initBackgroundMusic(musicUrl: string): Promise<void> {
+    if (this.backgroundMusic) {
+      return; // Already initialized
+    }
+
+    try {
+      this.backgroundMusic = new Audio(musicUrl);
+      this.backgroundMusic.loop = true;
+      this.backgroundMusic.volume = this.musicVolume;
+      this.backgroundMusic.preload = 'auto';
+      
+      // Handle errors
+      this.backgroundMusic.addEventListener('error', (e) => {
+        console.warn('Background music error:', e);
+      });
+    } catch (e) {
+      console.warn('Failed to initialize background music:', e);
+    }
+  }
+
+  async playBackgroundMusic(): Promise<void> {
+    if (!this.backgroundMusic) {
+      console.warn('Background music not initialized. Make sure the music file exists.');
+      return;
+    }
+    if (this.isMusicPlaying) return;
+
+    try {
+      // Ensure audio is unlocked first
+      await this.unlockAudio();
+      
+      // Play the music
+      await this.backgroundMusic.play();
+      this.isMusicPlaying = true;
+      console.log('Background music started');
+    } catch (e) {
+      console.warn('Failed to play background music:', e);
+      // If play fails, it might be because audio isn't unlocked yet
+      // The user will need to interact first
+      this.isMusicPlaying = false;
+    }
+  }
+
+  pauseBackgroundMusic(): void {
+    if (!this.backgroundMusic) return;
+    if (!this.isMusicPlaying) return;
+
+    try {
+      this.backgroundMusic.pause();
+      this.isMusicPlaying = false;
+    } catch (e) {
+      console.warn('Failed to pause background music:', e);
+    }
+  }
+
+  async toggleBackgroundMusic(): Promise<void> {
+    if (this.isMusicPlaying) {
+      this.pauseBackgroundMusic();
+    } else {
+      await this.playBackgroundMusic();
+    }
+  }
+
+  setMusicVolume(volume: number): void {
+    this.musicVolume = Math.max(0, Math.min(1, volume)); // Clamp between 0 and 1
+    if (this.backgroundMusic) {
+      this.backgroundMusic.volume = this.musicVolume;
+    }
+  }
+
+  getMusicPlaying(): boolean {
+    return this.isMusicPlaying;
   }
 }
 

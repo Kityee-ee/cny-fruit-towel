@@ -5,7 +5,7 @@ import { Altar } from './components/Altar';
 import { BlessingModal } from './components/BlessingModal';
 import { generateBlessing } from './services/geminiService';
 import { soundService } from './services/soundService';
-import { RotateCcw, Sparkles, Trash2 } from 'lucide-react';
+import { RotateCcw, Sparkles, Trash2, Music, Volume2, VolumeX } from 'lucide-react';
 
 // Simple UUID generator
 const simpleId = () => Math.random().toString(36).substr(2, 9);
@@ -17,8 +17,20 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [blessingData, setBlessingData] = useState<{ blessing: string, luckyNumbers: number[] } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   
   const trashRef = useRef<HTMLDivElement>(null);
+
+  // Initialize background music
+  useEffect(() => {
+    // Initialize music - the file should be in public/assets/
+    // Supports: .mp3, .wav, .ogg, .m4a
+    soundService.initBackgroundMusic('/assets/festive-music.wav').catch(() => {
+      // If music file doesn't exist, that's okay - it will just be silent
+      // You can use .mp3, .wav, .ogg, or .m4a - just update the filename above
+      console.log('Background music file not found. Please add festive-music.wav (or .mp3/.ogg/.m4a) to public/assets/');
+    });
+  }, []);
 
   // Unlock audio on first user interaction (required for mobile browsers)
   useEffect(() => {
@@ -49,6 +61,29 @@ const App: React.FC = () => {
       });
     };
   }, []);
+
+  // Sync music playing state
+  useEffect(() => {
+    const checkMusicState = () => {
+      setIsMusicPlaying(soundService.getMusicPlaying());
+    };
+    
+    // Check periodically to sync state
+    const interval = setInterval(checkMusicState, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleToggleMusic = async () => {
+    try {
+      await soundService.toggleBackgroundMusic();
+      // Update state after a brief delay to ensure the music state has changed
+      setTimeout(() => {
+        setIsMusicPlaying(soundService.getMusicPlaying());
+      }, 100);
+    } catch (error) {
+      console.error('Failed to toggle music:', error);
+    }
+  };
 
   const getCenterPosition = () => {
     const w = window.innerWidth;
@@ -114,7 +149,7 @@ const App: React.FC = () => {
       
       {/* Top Bar */}
       <div className="fixed top-0 left-0 right-0 p-4 z-50 flex justify-between items-start pointer-events-none">
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto flex items-center gap-2">
            <button 
              onClick={handleReset}
              className="bg-red-900/80 backdrop-blur text-yellow-200 py-2 px-4 rounded-full border border-yellow-600/50 hover:bg-red-800 transition shadow-lg flex items-center gap-2"
@@ -122,6 +157,14 @@ const App: React.FC = () => {
            >
              <RotateCcw size={18} />
              <span className="text-sm font-bold">重置</span>
+           </button>
+           <button 
+             onClick={handleToggleMusic}
+             className="bg-red-900/80 backdrop-blur text-yellow-200 py-2 px-3 rounded-full border border-yellow-600/50 hover:bg-red-800 transition shadow-lg flex items-center gap-2 cursor-pointer z-50"
+             title={isMusicPlaying ? "Pause Music" : "Play Music"}
+             type="button"
+           >
+             {isMusicPlaying ? <Volume2 size={18} /> : <VolumeX size={18} />}
            </button>
         </div>
 
