@@ -25,10 +25,10 @@ const App: React.FC = () => {
   useEffect(() => {
     // Initialize music - the file should be in public/assets/
     // Supports: .mp3, .wav, .ogg, .m4a
-    soundService.initBackgroundMusic('/assets/festive-music.wav').catch(() => {
+    soundService.initBackgroundMusic('/assets/festive-music.mp3').catch(() => {
       // If music file doesn't exist, that's okay - it will just be silent
       // You can use .mp3, .wav, .ogg, or .m4a - just update the filename above
-      console.log('Background music file not found. Please add festive-music.wav (or .mp3/.ogg/.m4a) to public/assets/');
+      console.log('Background music file not found. Please add festive-music.mp3 (or .wav/.ogg/.m4a) to public/assets/');
     });
   }, []);
 
